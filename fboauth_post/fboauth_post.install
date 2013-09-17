@@ -1,0 +1,59 @@
+<?php
+/*
+ * @file
+ * Posting to facebook using the fboauth module and Facebook api
+ * install file
+ */ 
+ 
+/**
+ * Implements hook_install()
+ */
+function fboauth_post_install() {
+// Check to see if annotation field exists.
+$field = field_info_field('fboauth_post_check');
+// if the annotation field does not exist then create it
+$t = get_t();
+
+  if (empty($field)) {
+    $field = array(
+      'field_name' => 'fboauth_post_check',
+      'cardinality' => '-1',
+      'settings' => array(
+        'allowed_values' => array(
+          'yes' => $t('Yes'),
+        ),
+        'allowed_values_function' => '',
+      ),
+      'translatable' => '0',
+      'type' => 'list_text',
+    );
+
+  $field = field_create_field($field);
+  }
+}
+
+/**
+ * Implements hook_uninstall()
+ */
+function fboauth_post_uninstall() {
+  watchdog("Facebook OAuth", "Uninstalling module and deleting fields");
+  
+  variable_set('fboauth_post_node_types', array());
+
+  $types = node_type_get_types();
+  foreach ($types as $type) {
+    fboauth_post_delete_check_field($type);
+  }
+  $field = field_info_field('fboauth_post_check');
+  
+  if ($field) {
+    field_delete_field('fboauth_post_check');
+  }
+}
+
+function fboauth_post_delete_check_field($type) {
+$instance = field_info_instance('node', 'fboauth_post_check', $type->type);
+  if ($instance) {
+    field_delete_instance($instance);
+  }
+}

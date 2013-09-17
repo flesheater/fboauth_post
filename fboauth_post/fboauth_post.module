@@ -1,0 +1,84 @@
+<?php
+/*
+ * @file
+ * Posting to facebook using the fboauth module and Facebook api
+ * 
+ */
+ 
+/**
+ * Implements hook_menu().
+ */
+function fboauth_post_menu() {
+  $items = array(); 
+  $items['admin/config/people/fboauth_post/settings'] = array(
+    'title' => 'Facebook OAuth publish settings',
+    'description' => 'Change how Facebook OAuth publish module behave.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('fboauth_post_admin_settings'),
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'fboauth_post.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function fboauth_post_permission() {
+  return array(
+    'facebook post' => array(
+      'title'       => t('Post to facebook'),
+      'description' => t('Able to post to Facebook'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_fboauth_actions().
+ */
+function fboauth_post_fboauth_actions() {
+  $actions['fboauth_face_wall_post'] = array(
+    'title' => t('Publish on facebook'),
+    'callback' => 'fboauth_post_fboauth_action_publish',
+    'permissions' => array('offline_access,publish_actions,status_update,publish_stream'), // a list: http://developers.facebook.com/docs/authentication/permissions/
+  );
+  return $actions;
+}
+
+/**
+ * Facebook OAuth action callback;
+ */
+function fboauth_post_fboauth_action_publish($app_id, $access_token) {
+  // Query against the Facebook Graph API. See the Facebook API for a list of
+  // commands: http://developers.facebook.com/docs/reference/api/
+  if (isset($_GET['state']) && user_is_logged_in() && user_access('facebook post')) {
+    $node = node_load($_GET['state']);
+    $params = array(
+      'message'     => $node->title . ' ',
+      'link'        => file_create_url('node/' . $node->nid), //'link'    => 'http://www.google.com', //
+      'picture'     => file_create_url($node->field_image['und'][0]['uri']), //'picture' => 'http://www.google.com/images/srpr/logo3w.png',
+      'name'        => $node->title,
+      'description' => $node->body['und'][0]['value']
+    );
+    $result = fboauth_graph_query('/me/feed', $access_token, $params, 'POST');
+    drupal_set_message(t('Publish to facebook complete!'));
+    return '<front>' ;
+  }
+  else {
+    watchdog('fboauth_face', 'Error executing fboauth action: @error', array('@error' => (isset($reponse->error) ? $response->error : t('Something went horribly wrong'))));
+    drupal_set_message(t("We couldn't post to your facebook wall. You dont have permissions to do it"));
+  }
+}
+
+/**
+ * Make the insertion to facebook  in hook_node_insert()
+ */
+function fboauth_post_node_insert($node) {
+   if (isset($node->fboauth_post_check) && $node->fboauth_post_check['und'][0]['value'] == 'yes') {
+     $fb_link = fboauth_action_link_properties('fboauth_face_wall_post');
+     $fb_link['query']['state'] = $node->nid;
+     $fb_query_url = url($fb_link['href'], array('absolute' => TRUE, 'query' => $fb_link['query'], ));
+     drupal_goto($fb_query_url);
+   }
+}

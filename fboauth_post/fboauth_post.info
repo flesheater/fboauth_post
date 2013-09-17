@@ -1,0 +1,8 @@
+name = Facebook OAuth post module
+description = This module extends fboauth and gives ability to post content to facebook
+core = 7.x
+project = "fboauth"
+
+files[] = fboauth_post.test
+
+dependencies[] = fboauth
