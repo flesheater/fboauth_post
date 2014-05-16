@@ -3,23 +3,26 @@
 * @file
 * Administration page callbacks for the Facebook OAuth module.
 */
+
 /**
 * Form builder. Configure Facebook OAuth.
 */
 function fboauth_post_admin_settings() {
+    
   $types = node_type_get_types();
   foreach ($types as $node_type) {
     $options[$node_type->type] = $node_type->name;
   }
+  
   $form['fboauth_post_node_types'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Countent types that could be published to FB'),
-    '#options' => $options,
-    '#description' => t('Check those content types, that you want them to be able to post their content to facebook'),
+    '#type'         =>  'checkboxes',
+    '#title'        =>  t('Countent types that could be published to FB'),
+    '#options'      =>  $options,
+    '#description'  =>  t('Check those content types, that you want them to be able to post their content to facebook'),
   );
   
   if (count(variable_get('fboauth_post_node_types'))) {
-     $form['fboauth_post_node_types']['#default_value'] = variable_get('fboauth_post_node_types');
+    $form['fboauth_post_node_types']['#default_value'] = variable_get('fboauth_post_node_types');
   }
  
   $form['#submit'][] = 'fboauth_post_admin_settings_submit';
@@ -32,16 +35,15 @@ function fboauth_post_admin_settings() {
 */
 function fboauth_post_admin_settings_submit($form, $form_state) {
   
-$field = field_info_field('fboauth_post_check');
+  $field = field_info_field('fboauth_post_check');
+  
   // if the annotation field does not exist then create it
   if (empty($field)) {
     $field = array(
-      'field_name' => 'fboauth_post_check',
+      'field_name'  => 'fboauth_post_check',
       'cardinality' => '-1',
-      'settings' => array(
-        'allowed_values' => array(
-          'yes' => t('Yes'),
-        ),
+      'settings'    => array(
+        'allowed_values' => array('yes' => t('Yes'),),
         'allowed_values_function' => '',
       ),
       'translatable' => '0',
@@ -49,7 +51,6 @@ $field = field_info_field('fboauth_post_check');
     );
 
   $field = field_create_field($field);
-
   }
  
   // Loop through each of the content type checkboxes shown on the form.
@@ -75,18 +76,18 @@ $field = field_info_field('fboauth_post_check');
       if (empty($instance)) {
         
         $instance = array(
-          'field_name' => 'fboauth_post_check',
-          'entity_type' => 'node',
-          'bundle' => $key,
-          'include_inactive' => TRUE,
-          'label' => t('Post to facebook?'),
-          'widget' => array(
-            'type' => 'options_buttons',
-            'weight' => 8,
-            'module' => 'options',
+          'field_name'        =>  'fboauth_post_check',
+          'entity_type'       =>  'node',
+          'bundle'            =>  $key,
+          'include_inactive'  =>  TRUE,
+          'label'             =>  t('Post to facebook?'),
+          'widget'            =>  array(
+            'type'    =>  'options_buttons',
+            'weight'  =>  8,
+            'module'  =>  'options',
           ),
         );
-  
+
         $instance = field_create_instance($instance);
         watchdog('Facebook OAuth', 'Added Facebook OAuth field to content type: %key', array('%key' => $key));
       }
@@ -94,4 +95,3 @@ $field = field_info_field('fboauth_post_check');
   } 
   // End foreach loop.
 }
-

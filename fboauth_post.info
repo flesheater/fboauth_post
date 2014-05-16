@@ -1,8 +1,8 @@
 name = Facebook OAuth post module
 description = This module extends fboauth and gives ability to post content to facebook
+version = VERSION
 core = 7.x
 project = "fboauth"
-
-files[] = fboauth_post.test
+configure = admin/config/people/fboauth_post/settings
 
 dependencies[] = fboauth
