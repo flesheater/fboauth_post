@@ -6,6 +6,39 @@
  */
 
 /**
+ * Implements hook_help().
+ */
+function fboauth_post_help($path, $arg) {
+
+  switch ($path) {
+    case 'admin/help#fboauth_post':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('This module lets you post to facebook your content with the help of the main fboauth module') . '</p>';
+      $output .= '<h3>' . t('Making it work') . '</h3>';
+      $output .= '<dl>';
+      $output .= '<dt>' . t('Create an app in facebook') . '</dt>';
+      $output .= '<dd>' . t('Disable sandbox mode and enable Website with Facebook Login.') . '</dd>';
+      $output .= '<dt>' . t('Add the App ID and App secret from the facebook App in facebook') . '</dt>';
+      $output .= '<dd>' . t('<a href="@fboauth-conf">Add the App ID and App secret</a> from the facebook App in facebook ', array('@fboauth-conf' => url('admin/config/people/fboauth'))) . '</dd>';
+      $output .= '<dt>' . t('Content types') . '</dt>';
+      $output .= '<dd>' . t('<a href="@fboauth-post-conf">Set the content types</a>, which nodes could be posted to facebook', array('@fboauth-post-conf' => url('admin/config/people/fboauth_post/settings'))) . '</dd>';
+      $output .= '<dt>' . t('Set the permissions') . '</dt>';
+      $output .= '<dd>' . t('go <a href="@permissions#module-fboauth_post">here</a> and set the "Post to facebook" permission to the role that must be able to post', array('@permissions' => url('admin/people/permissions'))) . '</dd>';
+      $output .= '</dl>';
+      $output .= '<h3>' . t('How it actually works') . '</h3>';
+      $output .= '<p>' . t('After the installation is finished here are the things that should be true in order for this module to work properly:');
+      $output .= '<ul>';
+      $output .= '<li>' . t('you have to be logged in with facebook') . '</li>';
+      $output .= '<li>' . t('you have to have permission to add <a href="@fboauth-post-conf">content that is confitured</a> for posting to facebook', array('@fboauth-post-conf' => url('admin/config/people/fboauth_post/settings'))) . '</li>';
+      $output .= '<li>' . t('you have to have <a href="@permissions#module-fboauth_post">permission to post to facebook</a>', array('@permissions' => url('admin/people/permissions'))) . '</li>';
+      $output .= '</ul>';
+      $output .= '</p>';
+      return $output;
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function fboauth_post_menu() {
@@ -86,3 +119,16 @@ function fboauth_post_node_insert($node) {
     }
   }
 }
+
+
+/**
+ * Implements hook_field_attach_form().
+ */
+function fboauth_post_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) { 
+  // check if the user have  permissions to post to facebook
+  // also have to check if the user is logged in with facebook
+  if (!user_access('facebook post')) {
+    $form['fboauth_post_check']['#access'] = FALSE;
+  }
+}
+
