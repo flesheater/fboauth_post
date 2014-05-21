@@ -120,7 +120,6 @@ function fboauth_post_node_insert($node) {
   }
 }
 
-
 /**
  * Implements hook_field_attach_form().
  */
@@ -131,4 +130,3 @@ function fboauth_post_field_attach_form($entity_type, $entity, &$form, &$form_st
     $form['fboauth_post_check']['#access'] = FALSE;
   }
 }
-

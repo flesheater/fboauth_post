@@ -21,4 +21,3 @@ Note:Now the module would work with the Article content type since by default it
      contains all the needed fields for posting to facebook - those are 
      Title, Body, Image - if you want the module to work properly just add those
      fields as existing fields to the content type that yow want use.
- 
